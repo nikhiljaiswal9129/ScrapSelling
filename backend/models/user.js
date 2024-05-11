@@ -9,7 +9,11 @@ const userSchema = new mongoose.Schema({
     phoneno: String,
     email: String,
     time: String,
-    address: String
+    address: String,
+    isActive: {
+        type: Boolean,
+        default: true
+    }
 })
 
 export default mongoose.model('user', userSchema);

@@ -7,9 +7,9 @@ const router  = express.Router();
 // Create
 router.post('/', async (req, res) => {
     try {
-        const { firstname, lastname, weight, address, date, remarks, phoneno, email, time } = req.body;
+        const { firstname, lastname, weight, address, date, remarks, phoneno, email, time, isActive } = req.body;
         const newUser = new user({
-            firstname, lastname, weight, address, date, remarks, phoneno, email, time
+            firstname, lastname, weight, address, date, remarks, phoneno, email, time, isActive
         });
         await newUser.save();
         // console.log('dnsbfd',newUser);
