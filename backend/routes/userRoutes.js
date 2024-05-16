@@ -2,6 +2,7 @@ import express from 'express';
 import user from  '../models/user.js';
 import role from '../models/role.js';
 import order from '../models/order.js';
+import { authenticateUser } from '../middleware/auth.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -9,11 +10,29 @@ const router  = express.Router();
 
 
 // Create
-router.post('/', async (req, res) => {
+// router.post('/', async (req, res) => {
+//     try {
+//         const { firstname, lastname, weight, address, date, remarks, phoneno, email, time, isActive } = req.body;
+//         const newUser = new user({
+//             firstname, lastname, weight, address, date, remarks, phoneno, email, time, isActive
+//         });
+//         await newUser.save();
+//         // console.log('dnsbfd',newUser);
+//         res.status(201).json(newUser);
+//     } catch (err) {
+//         res.status(400).json({ error: err.message });
+//     }
+// });
+
+// Create
+router.post('/', authenticateUser, async (req, res) => {
     try {
+        // console.log('pooo');
+        const userId = req.User._id;
+        // console.log('sasa',userId);
         const { firstname, lastname, weight, address, date, remarks, phoneno, email, time, isActive } = req.body;
         const newUser = new user({
-            firstname, lastname, weight, address, date, remarks, phoneno, email, time, isActive
+            userId: userId, firstname, lastname, weight, address, date, remarks, phoneno, email, time, isActive
         });
         await newUser.save();
         // console.log('dnsbfd',newUser);
@@ -23,8 +42,8 @@ router.post('/', async (req, res) => {
     }
 });
   
-// Read
-router.get('/', async (req, res) => {
+// get all orders(admin)...
+router.get('/all-orders', async (req, res) => {
     try {
         const users = await user.find();
         res.json(users);
@@ -32,6 +51,24 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+//get orders according to user...
+router.get('/', authenticateUser, async (req, res) => {
+    try {
+      const userId = req.User._id;
+      console.log('asdfsf', userId);
+      
+    //   const userOrders = await user.find({ userId[0]: userId }).exec();
+      const userOrders = await user.find({ userId: userId }).exec();
+      console.log('orderdata', userOrders);
+  
+      res.json(userOrders);
+    } catch (error) {
+      console.error('Error fetching user orders:', error);
+      res.status(500).json({ error: error.message });
+    }
+});
+  
   
 // Update
 router.put('/:id', async (req, res) => {
@@ -185,7 +222,8 @@ router.post('/login', async(req, res, next) => {
         res.cookie("access_token", token, {httpOnly: true}).status(200).json({
             status: 200,
             message: "Login Success",
-            data: user
+            data: user,
+            token: token
         })
     } catch (error) {
         res.status(400).json({ error: error.message }).send("NOt Registered");        
